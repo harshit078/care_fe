@@ -197,7 +197,6 @@ export const FacilityList = () => {
           options={[
             {
               key: "facility_district_name",
-              label: "Facility or District Name",
               type: "text" as const,
               placeholder: "facility_search_placeholder",
               value: qParams.search || "",

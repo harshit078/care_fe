@@ -2,16 +2,17 @@ import DeathReport from "@/components/DeathReport/DeathReport";
 import InvestigationReports from "@/components/Facility/Investigations/Reports";
 import FileUploadPage from "@/components/Patient/FileUploadPage";
 import { InsuranceDetails } from "@/components/Patient/InsuranceDetails";
-import { PatientManager } from "@/components/Patient/ManagePatients";
 import { patientTabs } from "@/components/Patient/PatientDetailsTab";
 import { PatientHome } from "@/components/Patient/PatientHome";
+import PatientIndex from "@/components/Patient/PatientIndex";
 import PatientNotes from "@/components/Patient/PatientNotes";
 import { PatientRegister } from "@/components/Patient/PatientRegister";
 
 import { AppRoutes } from "@/Routers/AppRouter";
 
 const PatientRoutes: AppRoutes = {
-  "/patients": () => <PatientManager />,
+  //"/patients": () => <PatientManager />,
+  "/patients": () => <PatientIndex />,
   "/patient/:id": ({ id }) => <PatientHome id={id} page="demography" />,
   "/patient/:id/investigation_reports": ({ id }) => (
     <InvestigationReports id={id} />

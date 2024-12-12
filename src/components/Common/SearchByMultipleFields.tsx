@@ -30,7 +30,6 @@ import PhoneNumberFormField from "@/components/Form/FormFields/PhoneNumberFormFi
 
 interface SearchOption {
   key: string;
-  label: string;
   type: "text" | "phone";
   placeholder: string;
   value: string;
@@ -241,7 +240,7 @@ const SearchByMultipleFields: React.FC<SearchByMultipleFieldsProps> = ({
                       <CareIcon icon="l-search" className="mr-2 h-4 w-4" />
                       <span className="flex-1">{t(option.key)}</span>
                       <kbd className="ml-auto text-xs text-gray-400">
-                        {option.label.charAt(0).toUpperCase()}
+                        {option.shortcutKey}
                       </kbd>
                     </CommandItem>
                   ))}
