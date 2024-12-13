@@ -1,11 +1,12 @@
 import dayjs from "dayjs";
-import { Link } from "raviger";
-import { useCallback } from "react";
+import { navigate } from "raviger";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 import { KeyboardShortcutKey } from "@/CAREUI/interactive/KeyboardShortcut";
 
+import useAuthUser from "@/hooks/useAuthUser";
 import useFilters from "@/hooks/useFilters";
 
 import { GENDER_TYPES } from "@/common/constants";
@@ -14,8 +15,11 @@ import routes from "@/Utils/request/api";
 import useQuery from "@/Utils/request/useQuery";
 import { formatPatientAge, parsePhoneNumber } from "@/Utils/utils";
 
+import * as Notification from "../../Utils/Notifications";
 import Page from "../Common/Page";
 import SearchByMultipleFields from "../Common/SearchByMultipleFields";
+import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
+import { FacilityModel } from "../Facility/models";
 import { Button } from "../ui/button";
 import {
   Table,
@@ -27,10 +31,14 @@ import {
 } from "../ui/table";
 import { TabbedSections } from "../ui/tabs";
 import PatientFilter, { PatientFilterBadges } from "./PatientFilter";
+import { getPatientUrl } from "./Utils";
 
 export default function PatientIndex() {
   const { t } = useTranslation();
-
+  const [showDialog, setShowDialog] = useState<"create" | "list-discharged">();
+  const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
+    name: "",
+  });
   const {
     qParams,
     updateQuery,
@@ -79,6 +87,8 @@ export default function PatientIndex() {
       shortcutKey: "e",
     },
   ];
+
+  const authUser = useAuthUser();
 
   const handleSearch = useCallback(
     (key: string, value: string) => {
@@ -144,6 +154,16 @@ export default function PatientIndex() {
     prefetch: isValidSearch,
   });
 
+  const { data: permittedFacilities } = useQuery(
+    routes.getPermittedFacilities,
+    {
+      query: { limit: 1 },
+    },
+  );
+
+  const onlyAccessibleFacility =
+    permittedFacilities?.count === 1 ? permittedFacilities.results[0] : null;
+
   return (
     <Page title="Patients" hideBack breadcrumbs={false}>
       <TabbedSections
@@ -152,9 +172,9 @@ export default function PatientIndex() {
             label: t("search_patients"),
             value: "search",
             section: (
-              <div className="flex items-center flex-col w-[800px] mx-auto">
+              <div className="flex items-center flex-col w-full lg:w-[800px] mx-auto">
                 <div className="w-full mt-4">
-                  <div className="flex justify-between mb-2 items-center">
+                  <div className="flex flex-col md:flex-row justify-between mb-2 md:items-center gap-2">
                     <div>
                       <PatientFilterBadges />
                     </div>
@@ -192,14 +212,14 @@ export default function PatientIndex() {
                     </TableHeader>
                     <TableBody>
                       {listingQuery.data?.results.map((patient, i) => (
-                        <TableRow className="bg-white" key={i}>
+                        <TableRow
+                          className="bg-white cursor-pointer"
+                          key={i}
+                          onClick={() => navigate(getPatientUrl(patient))}
+                        >
                           <TableCell className="min-w-[200px]">
-                            <Link
-                              href=""
-                              className="font-semibold text-black underline underline-offset-2 hover:text-green-500"
-                            >
-                              {patient.name}
-                            </Link>
+                            {patient.name}
+
                             <br />
                             <span>{patient.last_consultation?.patient_no}</span>
                           </TableCell>
@@ -224,8 +244,51 @@ export default function PatientIndex() {
                 {listingQuery.data && (
                   <Pagination totalCount={listingQuery?.data?.count} />
                 )}
-                <div className="w-full mt-6">
-                  <Button variant={"outline_primary"} className="gap-3">
+                <div className="w-full mt-4">
+                  <Button
+                    variant={"outline_primary"}
+                    className="gap-3"
+                    onClick={() => {
+                      const showAllFacilityUsers = [
+                        "DistrictAdmin",
+                        "StateAdmin",
+                      ];
+                      if (
+                        qParams.facility &&
+                        showAllFacilityUsers.includes(authUser.user_type)
+                      )
+                        navigate(
+                          `/facility/${qParams.facility}/register-patient`,
+                        );
+                      else if (
+                        qParams.facility &&
+                        !showAllFacilityUsers.includes(authUser.user_type) &&
+                        authUser.home_facility_object?.id !== qParams.facility
+                      )
+                        Notification.Error({
+                          msg: "Oops! Non-Home facility users don't have permission to perform this action.",
+                        });
+                      else if (
+                        !showAllFacilityUsers.includes(authUser.user_type) &&
+                        authUser.home_facility_object?.id
+                      ) {
+                        navigate(
+                          `/facility/${authUser.home_facility_object.id}/register-patient`,
+                        );
+                      } else if (onlyAccessibleFacility)
+                        navigate(
+                          `/facility/${onlyAccessibleFacility.id}/register-patient`,
+                        );
+                      else if (
+                        !showAllFacilityUsers.includes(authUser.user_type) &&
+                        !authUser.home_facility_object?.id
+                      )
+                        Notification.Error({
+                          msg: "Oops! No home facility found",
+                        });
+                      else setShowDialog("create");
+                    }}
+                  >
                     <CareIcon icon="l-plus" />
                     Add new patient
                     <KeyboardShortcutKey shortcut={["Shift", "P"]} />
@@ -240,6 +303,25 @@ export default function PatientIndex() {
       <PatientFilter
         {...advancedFilter}
         key={JSON.stringify(advancedFilter.filter)}
+      />
+      <FacilitiesSelectDialogue
+        show={!!showDialog}
+        setSelected={(e) => setSelectedFacility(e)}
+        selectedFacility={selectedFacility}
+        handleOk={() => {
+          switch (showDialog) {
+            case "create":
+              navigate(`facility/${selectedFacility.id}/register-patient`);
+              break;
+            case "list-discharged":
+              navigate(`facility/${selectedFacility.id}/discharged-patients`);
+              break;
+          }
+        }}
+        handleCancel={() => {
+          setShowDialog(undefined);
+          setSelectedFacility({ name: "" });
+        }}
       />
     </Page>
   );
