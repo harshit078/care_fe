@@ -10,7 +10,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
@@ -40,17 +39,14 @@ import {
   type Condition,
 } from "@/types/questionnaire/condition";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
-import type { Question } from "@/types/questionnaire/question";
 
 interface ConditionQuestionProps {
-  question: Question;
   questionnaireResponse: QuestionnaireResponse;
   updateQuestionnaireResponseCB: (response: QuestionnaireResponse) => void;
   disabled?: boolean;
 }
 
 export function ConditionQuestion({
-  question,
   questionnaireResponse,
   updateQuestionnaireResponseCB,
   disabled,
@@ -59,13 +55,8 @@ export function ConditionQuestion({
     return (questionnaireResponse.values?.[0]?.value as Condition[]) || [];
   });
 
-  const [principalDiagnosis, setPrincipalDiagnosis] = useState<string>(() => {
-    return (questionnaireResponse.values?.[1]?.value as string) || "";
-  });
-
   const conditionSearch = useQuery(routes.valueset.expand, {
-    // TODO: change type in system-condition-code after backend is updated
-    pathParams: { system: "system-codition-code" },
+    pathParams: { system: "system-condition-code" },
     body: { count: 10 },
     prefetch: false,
   });
@@ -117,26 +108,8 @@ export function ConditionQuestion({
     });
   };
 
-  const handlePrincipalDiagnosisChange = (conditionId: string) => {
-    setPrincipalDiagnosis(conditionId);
-    updateQuestionnaireResponseCB({
-      ...questionnaireResponse,
-      values: [
-        {
-          type: "condition",
-          value: conditions,
-        },
-        {
-          type: "string",
-          value: conditionId,
-        },
-      ],
-    });
-  };
-
   return (
     <div className="space-y-4">
-      <Label>{question.text}</Label>
       <div className="rounded-lg border p-4">
         <div className="overflow-x-auto">
           <Table>
@@ -310,31 +283,6 @@ export function ConditionQuestion({
           <PlusIcon className="mr-2 h-4 w-4" />
           Add Condition
         </Button>
-
-        {conditions.length > 0 && (
-          <div className="mt-6">
-            <Label>Principal Diagnosis</Label>
-            <Select
-              value={principalDiagnosis || undefined}
-              onValueChange={handlePrincipalDiagnosisChange}
-              disabled={disabled}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select principal diagnosis" />
-              </SelectTrigger>
-              <SelectContent>
-                {conditions.map(
-                  (condition, index) =>
-                    condition.code.code && (
-                      <SelectItem key={index} value={condition.code.code}>
-                        {condition.code.display || condition.code.code}
-                      </SelectItem>
-                    ),
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
       </div>
     </div>
   );

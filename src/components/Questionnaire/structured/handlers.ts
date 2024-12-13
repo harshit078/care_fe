@@ -18,6 +18,7 @@ type StructuredHandler<T extends StructuredQuestionType> = {
     url: string;
     method: string;
     body: RequestTypeFor<T>;
+    reference_id: string;
   }>;
 };
 
@@ -43,16 +44,20 @@ const handlers: {
           url: `/api/v1/patient/${resourceId}/allergy_intolerance/`,
           method: "POST",
           body,
+          reference_id: "allergy_intolerance",
         };
       }),
   },
   medication_request: {
     getRequests: (medications, { encounterId }) => {
-      return medications.map((medication) => ({
-        url: `/api/v1/consultation/${encounterId}/medication/request/`,
-        method: "POST",
-        body: medication,
-      }));
+      return [
+        {
+          url: `/api/v1/consultation/${encounterId}/medication/request/upsert/`,
+          method: "POST",
+          body: { datapoints: medications },
+          reference_id: "medication_request",
+        },
+      ];
     },
   },
   condition: {
@@ -72,6 +77,7 @@ const handlers: {
           url: `/api/v1/patient/${resourceId}/condition/`,
           method: "POST",
           body,
+          reference_id: "condition",
         };
       }),
   },

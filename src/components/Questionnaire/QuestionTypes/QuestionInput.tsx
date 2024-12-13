@@ -226,7 +226,6 @@ export function QuestionInput({
           case "allergy_intolerance":
             return (
               <AllergyQuestion
-                question={question}
                 questionnaireResponse={questionnaireResponse}
                 updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
                 disabled={!isEnabled}
@@ -235,7 +234,6 @@ export function QuestionInput({
           case "condition":
             return (
               <ConditionQuestion
-                question={question}
                 questionnaireResponse={questionnaireResponse}
                 updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
                 disabled={!isEnabled}
@@ -306,7 +304,7 @@ export function QuestionInput({
       <div className="space-y-1">
         <div className="flex items-center justify-between">
           <Label className="text-base font-medium">
-            {question.text}
+            {question.link_id} - {question.text}
             {question.required && <span className="ml-1 text-red-500">*</span>}
           </Label>
         </div>
@@ -315,11 +313,14 @@ export function QuestionInput({
         {renderInput()}
         {error && <p className="text-sm font-medium text-red-500">{error}</p>}
       </div>
-      <NotesInput
-        questionnaireResponse={questionnaireResponse}
-        updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
-        disabled={!isEnabled}
-      />
+      {/* Notes are not available for structured questions */}
+      {!question.structured_type && (
+        <NotesInput
+          questionnaireResponse={questionnaireResponse}
+          updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
+          disabled={!isEnabled}
+        />
+      )}
     </div>
   );
 }

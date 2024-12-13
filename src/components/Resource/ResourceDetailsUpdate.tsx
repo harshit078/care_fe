@@ -24,7 +24,7 @@ import { RESOURCE_CHOICES } from "@/common/constants";
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 
 interface resourceProps {
   id: string;
@@ -33,21 +33,15 @@ interface resourceProps {
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
 const initForm: any = {
-  approving_facility_object: null,
   assigned_facility_object: null,
   emergency: "false",
   title: "",
   reason: "",
   assigned_facility_type: "",
   assigned_to: "",
-  requested_quantity: null,
-  assigned_quantity: null,
 };
 
 const requiredFields: any = {
-  approving_facility_object: {
-    errorText: "Resource approving facility can not be empty.",
-  },
   assigned_facility_type: {
     errorText: "Please Select Facility Type",
   },
@@ -89,13 +83,16 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
 
   const [state, dispatch] = useReducer(resourceFormReducer, initialState);
 
-  const { loading: assignedUserLoading } = useQuery(routes.userList, {
-    onResponse: ({ res, data }) => {
-      if (res?.ok && data && data.count) {
-        SetAssignedUser(data.results[0]);
-      }
+  const { loading: assignedUserLoading } = useTanStackQueryInstead(
+    routes.userList,
+    {
+      onResponse: ({ res, data }) => {
+        if (res?.ok && data && data.count) {
+          SetAssignedUser(data.results[0]);
+        }
+      },
     },
-  });
+  );
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -131,17 +128,20 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const { data: resourceDetails } = useQuery(routes.getResourceDetails, {
-    pathParams: { id: props.id },
-    onResponse: ({ res, data }) => {
-      if (res && data) {
-        const d = data;
-        d["status"] = qParams.status || data.status;
-        dispatch({ type: "set_form", form: d });
-      }
-      setIsLoading(false);
+  const { data: resourceDetails } = useTanStackQueryInstead(
+    routes.getResourceDetails,
+    {
+      pathParams: { id: props.id },
+      onResponse: ({ res, data }) => {
+        if (res && data) {
+          const d = data;
+          d["status"] = qParams.status || data.status;
+          dispatch({ type: "set_form", form: d });
+        }
+        setIsLoading(false);
+      },
     },
-  });
+  );
 
   const handleSubmit = async () => {
     const validForm = validateForm();
@@ -150,20 +150,13 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       setIsLoading(true);
 
       const resourceData = {
-        category: "OXYGEN",
         status: state.form.status,
         origin_facility: state.form.origin_facility_object?.id,
-        approving_facility: state.form?.approving_facility_object?.id,
         assigned_facility: state.form?.assigned_facility_object?.id,
         emergency: [true, "true"].includes(state.form.emergency),
         title: state.form.title,
         reason: state.form.reason,
         assigned_to: state.form.assigned_to,
-        requested_quantity: state.form.requested_quantity || 0,
-        assigned_quantity:
-          state.form.status === "PENDING"
-            ? state.form.assigned_quantity
-            : resourceDetails?.assigned_quantity || 0,
       };
 
       const { res, data } = await request(routes.updateResource, {
@@ -223,19 +216,6 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 )}
               </div>
             </div>
-            <div>
-              <FieldLabel>Name of resource approving facility</FieldLabel>
-              <FacilitySelect
-                multiple={false}
-                name="approving_facility"
-                facilityType={1500}
-                selected={state.form.approving_facility_object}
-                setSelected={(obj) =>
-                  setFacility(obj, "approving_facility_object")
-                }
-                errors={state.errors.approving_facility}
-              />
-            </div>
 
             <div>
               <FieldLabel>
@@ -250,25 +230,6 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                   setFacility(obj, "assigned_facility_object")
                 }
                 errors={state.errors.assigned_facility}
-              />
-            </div>
-            <div>
-              <TextFormField
-                label="Required Quantity"
-                name="requested_quantity"
-                type="number"
-                value={state.form.requested_quantity}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <TextFormField
-                name="assigned_quantity"
-                type="number"
-                label="Approved Quantity"
-                value={state.form.assigned_quantity}
-                onChange={handleChange}
-                disabled={state.form.status !== "PENDING"}
               />
             </div>
 

@@ -34,6 +34,7 @@ interface BatchRequest {
   url: string;
   method: string;
   body: Record<string, any>;
+  reference_id: string;
 }
 
 export interface QuestionnaireFormProps {
@@ -196,6 +197,7 @@ export function QuestionnaireForm({
         requests.push({
           url: `/api/v1/questionnaire/${form.questionnaire.slug}/submit/`,
           method: "POST",
+          reference_id: form.questionnaire.id,
           body: {
             resource_id: resourceId,
             encounter: encounterId,
@@ -207,8 +209,8 @@ export function QuestionnaireForm({
               .map((response) => ({
                 question_id: response.question_id,
                 values: response.values.map((value) => ({
-                  ...(value.code
-                    ? { code: value.code }
+                  ...(value.value_code
+                    ? { value_code: value.value_code }
                     : { value: String(value.value || "") }),
                 })),
                 note: response.note,
@@ -350,11 +352,11 @@ export function QuestionnaireForm({
                 questions={form.questionnaire.questions}
                 responses={form.responses}
                 onResponseChange={(responses) => {
-                  setQuestionnaireForms((prevForms) =>
-                    prevForms.map((f) =>
-                      f.questionnaire.id === form.questionnaire.id
-                        ? { ...f, responses }
-                        : f,
+                  setQuestionnaireForms((existingForms) =>
+                    existingForms.map((formItem) =>
+                      formItem.questionnaire.id === form.questionnaire.id
+                        ? { ...formItem, responses }
+                        : formItem,
                     ),
                   );
                 }}
@@ -409,6 +411,13 @@ export function QuestionnaireForm({
               </Button>
             </div>
           )}
+        </div>
+        {/* Add a Preview of the QuestionnaireForm */}
+        <div className="p-4 space-y-6">
+          <h2 className="text-xl font-semibold">QuestionnaireForm</h2>
+          <pre className="text-sm text-muted-foreground">
+            {JSON.stringify(questionnaireForms, null, 2)}
+          </pre>
         </div>
       </div>
     </div>

@@ -20,8 +20,8 @@ export type ResponseValue = {
     | AllergyIntolerance[]
     | MedicationRequest[]
     | Condition[];
-  code?: Code;
-  quantity?: Quantity;
+  value_code?: Code;
+  value_quantity?: Quantity;
 };
 
 export interface QuestionnaireResponse {

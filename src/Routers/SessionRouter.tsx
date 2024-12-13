@@ -6,10 +6,16 @@ import ResetPassword from "@/components/Auth/ResetPassword";
 import InvalidReset from "@/components/ErrorPages/InvalidReset";
 import SessionExpired from "@/components/ErrorPages/SessionExpired";
 
+import { FacilitiesPage } from "@/pages/Facility/FacilitiesPage";
+import { FacilityDetailsPage } from "@/pages/Facility/FacilityDetailsPage";
+import { LandingPage } from "@/pages/Landing/LandingPage";
+
 const LicensesPage = lazy(() => import("@/components/Licenses/LicensesPage"));
 
 const routes = {
-  "/": () => <Login />,
+  "/": () => <LandingPage />,
+  "/facilities": () => <FacilitiesPage />,
+  "/facility/:id": ({ id }: { id: string }) => <FacilityDetailsPage id={id} />,
   "/login": () => <Login />,
   "/forgot-password": () => <Login forgot={true} />,
   "/password_reset/:token": ({ token }: { token: string }) => (

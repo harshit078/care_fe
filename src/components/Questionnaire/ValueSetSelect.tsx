@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -40,8 +42,7 @@ export default function ValueSetSelect({
 
   const searchQuery = useQuery(routes.valueset.expand, {
     pathParams: { system },
-    body: { count: 10 },
-    prefetch: false,
+    body: { count: 10, search: "" },
   });
 
   return (
@@ -50,7 +51,10 @@ export default function ValueSetSelect({
         <Button
           variant="outline"
           role="combobox"
-          className="w-full justify-between truncate"
+          className={cn(
+            "w-full justify-between truncate",
+            !value?.display && "text-gray-400",
+          )}
         >
           {value?.display || placeholder}
         </Button>

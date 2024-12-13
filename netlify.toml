@@ -4,7 +4,6 @@ command = "CI='' npm run build"
 
 [build.environment]
 NODE_VERSION = "22.11.0"
-NPM_FLAGS = "--no-optional"
 NODE_OPTIONS = "--max_old_space_size=4096"
 
 [[redirects]]

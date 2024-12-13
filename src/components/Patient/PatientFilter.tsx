@@ -47,7 +47,7 @@ import { parseOptionId } from "@/common/utils";
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { dateQueryString, humanizeStrings } from "@/Utils/utils";
 
 import { ICD11DiagnosisModel } from "../Diagnosis/types";
@@ -118,19 +118,19 @@ export default function PatientFilter(props: any) {
     review_missed: filter.review_missed || null,
   });
 
-  useQuery(routes.getAnyFacility, {
+  useTanStackQueryInstead(routes.getAnyFacility, {
     pathParams: { id: filter.facility },
     prefetch: !!filter.facility,
     onResponse: ({ data }) => setFilterState({ facility_ref: data }),
   });
 
-  useQuery(routes.getDistrict, {
+  useTanStackQueryInstead(routes.getDistrict, {
     pathParams: { id: filter.district },
     prefetch: !!filter.district,
     onResponse: ({ data }) => setFilterState({ district_ref: data }),
   });
 
-  useQuery(routes.getLocalBody, {
+  useTanStackQueryInstead(routes.getLocalBody, {
     pathParams: { id: filter.lsgBody },
     prefetch: !!filter.lsgBody,
     onResponse: ({ data }) => setFilterState({ lsgBody_ref: data }),
@@ -808,27 +808,30 @@ export function PatientFilterBadges() {
 
   const [diagnoses, setDiagnoses] = useState<ICD11DiagnosisModel[]>([]);
 
-  const { data: districtData } = useQuery(routes.getDistrict, {
+  const { data: districtData } = useTanStackQueryInstead(routes.getDistrict, {
     pathParams: {
       id: qParams.district,
     },
     prefetch: !!Number(qParams.district),
   });
 
-  const { data: LocalBodyData } = useQuery(routes.getLocalBody, {
+  const { data: LocalBodyData } = useTanStackQueryInstead(routes.getLocalBody, {
     pathParams: {
       id: qParams.lsgBody,
     },
     prefetch: !!Number(qParams.lsgBody),
   });
 
-  const { data: facilityData } = useQuery(routes.getAnyFacility, {
-    pathParams: {
-      id: qParams.facility,
+  const { data: facilityData } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      pathParams: {
+        id: qParams.facility,
+      },
+      prefetch: !!qParams.facility,
     },
-    prefetch: !!qParams.facility,
-  });
-  const { data: facilityAssetLocationData } = useQuery(
+  );
+  const { data: facilityAssetLocationData } = useTanStackQueryInstead(
     routes.getFacilityAssetLocation,
     {
       pathParams: {

@@ -19,17 +19,13 @@ import { FieldChangeEvent } from "@/components/Form/FormFields/Utils";
 
 import useAppHistory from "@/hooks/useAppHistory";
 
-import {
-  OptionsType,
-  RESOURCE_CATEGORY_CHOICES,
-  RESOURCE_SUBCATEGORIES,
-} from "@/common/constants";
+import { RESOURCE_CATEGORY_CHOICES } from "@/common/constants";
 import { phonePreg } from "@/common/validation";
 
 import * as Notification from "@/Utils/Notifications";
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import useQuery from "@/Utils/request/useQuery";
+import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { parsePhoneNumber } from "@/Utils/utils";
 
 interface resourceProps {
@@ -37,16 +33,14 @@ interface resourceProps {
 }
 
 const initForm: any = {
-  category: "OXYGEN",
+  category: "",
   sub_category: 1000,
-  approving_facility: null,
   assigned_facility: null,
   emergency: "false",
   title: "",
   reason: "",
   refering_facility_contact_name: "",
   refering_facility_contact_number: "+91",
-  required_quantity: null,
 };
 
 const requiredFields: any = {
@@ -56,8 +50,8 @@ const requiredFields: any = {
   sub_category: {
     errorText: "Subcategory",
   },
-  approving_facility: {
-    errorText: "Name of the referring facility",
+  assigned_facility: {
+    errorText: "Name of the facility",
   },
   refering_facility_contact_name: {
     errorText: "Name of contact of the referring facility",
@@ -113,10 +107,13 @@ export default function ResourceCreate(props: resourceProps) {
 
   const [state, dispatch] = useReducer(resourceFormReducer, initialState);
 
-  const { data: facilityData } = useQuery(routes.getAnyFacility, {
-    prefetch: facilityId !== undefined,
-    pathParams: { id: String(facilityId) },
-  });
+  const { data: facilityData } = useTanStackQueryInstead(
+    routes.getAnyFacility,
+    {
+      prefetch: facilityId !== undefined,
+      pathParams: { id: String(facilityId) },
+    },
+  );
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -181,7 +178,6 @@ export default function ResourceCreate(props: resourceProps) {
         category: state.form.category,
         sub_category: state.form.sub_category,
         origin_facility: String(props.facilityId),
-        approving_facility: (state.form.approving_facility || {}).id,
         assigned_facility: (state.form.assigned_facility || {}).id,
         emergency: state.form.emergency === "true",
         title: state.form.title,
@@ -191,7 +187,6 @@ export default function ResourceCreate(props: resourceProps) {
         refering_facility_contact_number: parsePhoneNumber(
           state.form.refering_facility_contact_number,
         ),
-        requested_quantity: state.form.requested_quantity || 0,
       };
 
       const { res, data } = await request(routes.createResource, {
@@ -243,16 +238,15 @@ export default function ResourceCreate(props: resourceProps) {
         />
 
         <div>
-          <FieldLabel required>{t("approving_facility")}</FieldLabel>
+          <FieldLabel required>{t("assigned_facility")}</FieldLabel>
           <FacilitySelect
             multiple={false}
-            facilityType={1500}
-            name="approving_facility"
-            selected={state.form.approving_facility}
+            name="assigned_facility"
+            selected={state.form.assigned_facility}
             setSelected={(value: any) =>
-              handleValueChange(value, "approving_facility")
+              handleValueChange(value, "assigned_facility")
             }
-            errors={state.errors.approving_facility}
+            errors={state.errors.assigned_facility}
           />
         </div>
 
@@ -276,33 +270,17 @@ export default function ResourceCreate(props: resourceProps) {
           optionValue={(option: string) => option}
           onChange={({ value }) => handleValueChange(value, "category")}
         />
-        <SelectFormField
-          label={t("sub_category")}
-          name="sub_category"
-          required
-          value={state.form.sub_category}
-          options={RESOURCE_SUBCATEGORIES}
-          optionLabel={(option: OptionsType) => option.text}
-          optionValue={(option: OptionsType) => option.id}
-          onChange={({ value }) => handleValueChange(value, "sub_category")}
-        />
-
-        <TextFormField
-          label={t("request_title")}
-          name="title"
-          placeholder={t("request_title_placeholder")}
-          value={state.form.title}
-          onChange={handleChange}
-          error={state.errors.title}
-          required
-        />
-
-        <TextFormField
-          label={t("required_quantity")}
-          name="requested_quantity"
-          value={state.form.required_quantity}
-          onChange={handleChange}
-        />
+        <div className="md:col-span-2">
+          <TextFormField
+            label={t("request_title")}
+            name="title"
+            placeholder={t("request_title_placeholder")}
+            value={state.form.title}
+            onChange={handleChange}
+            error={state.errors.title}
+            required
+          />
+        </div>
 
         <div className="md:col-span-2">
           <TextAreaFormField

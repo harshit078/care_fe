@@ -90,6 +90,7 @@ import {
 } from "@/components/Users/models";
 
 import { PaginatedResponse } from "@/Utils/request/types";
+import { Observation } from "@/types/emr/observation";
 import { PlugConfig } from "@/types/plugConfig";
 import {
   BatchRequestBody,
@@ -97,6 +98,7 @@ import {
 } from "@/types/questionnaire/batch";
 import { Code } from "@/types/questionnaire/code";
 import type { QuestionnaireDetail } from "@/types/questionnaire/questionnaire";
+import type { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -1525,6 +1527,21 @@ const routes = {
       method: "DELETE",
       TRes: Type<Record<string, never>>(),
     },
+  },
+  getQuestionnaireResponses: {
+    path: "/api/v1/patient/{patientId}/questionnaire_response/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<QuestionnaireResponse>>(),
+  },
+  getQuestionnaireResponse: {
+    path: "/api/v1/patient/{patientId}/questionnaire_response/{responseId}/",
+    method: "GET",
+    TRes: Type<QuestionnaireResponse>(),
+  },
+  listObservations: {
+    path: "/api/v1/patient/{patientId}/observation/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<Observation>>(),
   },
 } as const;
 

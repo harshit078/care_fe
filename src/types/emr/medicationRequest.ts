@@ -115,6 +115,7 @@ export interface DosageInstruction {
 }
 
 export interface MedicationRequest {
+  readonly id?: string; // TODO: make this non nullable and use Writable once type issue with StructuredRequestMap for allergy intolerance is solved.
   status?: MedicationRequestStatus;
   status_reason?: MedicationRequestStatusReason;
   status_changed?: string | null; // DateTime

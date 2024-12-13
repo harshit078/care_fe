@@ -1,6 +1,6 @@
 import { ValidateEnv } from "@julr/vite-plugin-validate-env";
 import federation from "@originjs/vite-plugin-federation";
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
 import DOMPurify from "dompurify";
 import fs from "fs";
 import { JSDOM } from "jsdom";

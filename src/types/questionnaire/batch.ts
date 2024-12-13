@@ -7,6 +7,7 @@ export interface BatchRequestBody {
   requests: Array<{
     url: string;
     method: string;
+    reference_id: string;
     body: any;
   }>;
 }

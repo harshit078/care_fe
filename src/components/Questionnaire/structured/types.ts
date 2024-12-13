@@ -16,7 +16,7 @@ export interface StructuredDataMap {
 // Map structured types to their request types
 export interface StructuredRequestMap {
   allergy_intolerance: AllergyIntoleranceRequest;
-  medication_request: MedicationRequest;
+  medication_request: { datapoints: MedicationRequest[] };
   condition: ConditionRequest;
 }
 

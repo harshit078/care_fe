@@ -10,8 +10,8 @@ const deps: Record<string, Record<string, string[]>> = {
     x64: ["@rollup/rollup-darwin-x64"],
   },
   linux: {
-    arm64: ["@rollup/rollup-linux-arm64-gnu"],
-    x64: ["@rollup/rollup-linux-x64-gnu"],
+    arm64: ["@rollup/rollup-linux-arm64-gnu", "@esbuild/linux-arm64"],
+    x64: ["@rollup/rollup-linux-x64-gnu", "@esbuild/linux-x64"],
   },
 };
 
@@ -22,11 +22,26 @@ if (platformDeps.length > 0) {
     `Installing platform-specific dependencies for ${platform}-${arch}`,
   );
   try {
-    execSync(`npm install --no-save ${platformDeps.join(" ")}`, {
-      stdio: "inherit",
+    // Check if dependencies are already installed
+    const isInstalled = platformDeps.every((dep) => {
+      try {
+        require.resolve(dep);
+        return true;
+      } catch {
+        return false;
+      }
     });
+
+    if (!isInstalled) {
+      execSync(`npm install --no-save ${platformDeps.join(" ")}`, {
+        stdio: "inherit",
+      });
+    } else {
+      console.log("Platform-specific dependencies are already installed");
+    }
   } catch (error) {
     console.error("Failed to install platform-specific dependencies:", error);
-    process.exit(1);
+    // Don't exit with error code 1 to prevent build failure
+    console.log("Continuing build process...");
   }
 }

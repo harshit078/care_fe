@@ -25,7 +25,7 @@ export interface QuestionnaireDetail {
   subject_type: SubjectType;
 }
 
-export interface QuestionnaireResponse {
+export interface QuestionnaireForms {
   count: number;
   results: QuestionnaireDetail[];
 }
