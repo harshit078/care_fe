@@ -1,17 +1,18 @@
 import careConfig from "@careConfig";
 import { RadioGroupItem } from "@radix-ui/react-radio-group";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import SectionNavigator from "@/CAREUI/misc/SectionNavigator";
 
-import useDebounce from "@/hooks/useDebounce";
-
 import {
+  DOMESTIC_HEALTHCARE_SUPPORT_CHOICES,
   GENDER_TYPES,
   OCCUPATION_TYPES,
   RATION_CARD_CATEGORY,
+  SOCIOECONOMIC_STATUS_CHOICES,
 } from "@/common/constants";
 import countryList from "@/common/static/countries.json";
 import { validatePincode } from "@/common/validation";
@@ -19,10 +20,10 @@ import { validatePincode } from "@/common/validation";
 import routes from "@/Utils/request/api";
 import query from "@/Utils/request/query";
 import request from "@/Utils/request/request";
-import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { getPincodeDetails, includesIgnoreCase } from "@/Utils/utils";
 
 import Page from "../Common/Page";
+import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -52,7 +53,7 @@ export default function PatientRegistration(
   const sidebarItems = [
     { label: t("patient__general-info"), id: "general-info" },
     { label: t("social_profile"), id: "social-profile" },
-    { label: t("volunteer_contact"), id: "volunteer-contact" },
+    //{ label: t("volunteer_contact"), id: "volunteer-contact" },
     { label: t("patient__insurance-details"), id: "insurance-details" },
   ];
 
@@ -147,12 +148,17 @@ export default function PatientRegistration(
       setForm((f) => ({ ...f, [field]: e.target.value })),
   });
 
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    //...
+  };
+
   return (
     <Page title={title}>
       <hr className="mt-4" />
-      <div className="relative mt-4 flex gap-4">
-        <SectionNavigator sections={sidebarItems} />
-        <div className="md:w-[500px]">
+      <div className="relative mt-4 flex flex-col md:flex-row gap-4">
+        <SectionNavigator sections={sidebarItems} className="hidden md:flex" />
+        <form className="md:w-[500px]" onSubmit={handleFormSubmit}>
           <div id={"general-info"}>
             <h2 className="text-lg font-semibold">
               {t("patient__general-info")}
@@ -315,6 +321,17 @@ export default function PatientRegistration(
               required
               label={t("pincode")}
             />
+            {showAutoFilledPincode && (
+              <div>
+                <CareIcon
+                  icon="l-check-circle"
+                  className="mr-2 text-sm text-green-500"
+                />
+                <span className="text-sm text-primary-500">
+                  {t("pincode_autofill")}
+                </span>
+              </div>
+            )}
             <br />
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -504,8 +521,66 @@ export default function PatientRegistration(
                 </SelectContent>
               </Select>
             </div>
+            <br />
+            <RadioGroup
+              label={t("socioeconomic_status")}
+              required
+              value={form.gender?.toString()}
+              onValueChange={(value) =>
+                setForm((f) => ({ ...f, gender: Number(value) }))
+              }
+              className="flex items-center gap-4"
+            >
+              {SOCIOECONOMIC_STATUS_CHOICES.map((sec) => (
+                <>
+                  <RadioGroupItem value={sec} id={"sec_" + sec} />
+                  <Label htmlFor={"sec_" + sec}>
+                    {t(`SOCIOECONOMIC_STATUS__${sec}`)}
+                  </Label>
+                </>
+              ))}
+            </RadioGroup>
+            <br />
+            <RadioGroup
+              label={t("has_domestic_healthcare_support")}
+              required
+              value={form.gender?.toString()}
+              onValueChange={(value) =>
+                setForm((f) => ({ ...f, gender: Number(value) }))
+              }
+              className="flex items-center gap-4"
+            >
+              {DOMESTIC_HEALTHCARE_SUPPORT_CHOICES.map((dhs) => (
+                <>
+                  <RadioGroupItem value={dhs} id={"dhs_" + dhs} />
+                  <Label htmlFor={"dhs_" + dhs}>
+                    {t(`DOMESTIC_HEALTHCARE_SUPPORT__${dhs}`)}
+                  </Label>
+                </>
+              ))}
+            </RadioGroup>
           </div>
-        </div>
+          {/* <div id="volunteer-contact" className="mt-10">
+            <h2 className="text-lg font-semibold">
+              {t("patient__volunteer-contact")}
+            </h2>
+            <div className="text-sm">{t("volunteer_contact_detail")}</div>
+            <br />
+  
+          </div> */}
+          <div id="insurance-details" className="mt-10">
+            <h2 className="text-lg font-semibold">
+              {t("patient__insurance-details")}
+            </h2>
+            <div className="text-sm">{t("insurance_details_detail")}</div>
+            <br />
+          </div>
+          <div className="flex justify-end mt-20">
+            <Button type="submit" variant={"primary"}>
+              {t("save_and_continue")}
+            </Button>
+          </div>
+        </form>
       </div>
     </Page>
   );

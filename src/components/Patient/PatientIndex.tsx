@@ -30,6 +30,7 @@ import {
   TableRow,
 } from "../ui/table";
 import { TabbedSections } from "../ui/tabs";
+import { PatientManager } from "./ManagePatients";
 import PatientFilter, { PatientFilterBadges } from "./PatientFilter";
 import { getPatientUrl } from "./Utils";
 
@@ -297,7 +298,11 @@ export default function PatientIndex() {
               </div>
             ),
           },
-          { label: t("all_patients"), value: "all", section: <>todo</> },
+          {
+            label: t("all_patients"),
+            value: "all",
+            section: <PatientManager />,
+          },
         ]}
       />
       <PatientFilter

@@ -7,7 +7,6 @@ import { Avatar } from "@/components/Common/Avatar";
 import ButtonV2 from "@/components/Common/ButtonV2";
 import { ExportMenu } from "@/components/Common/Export";
 import Loading from "@/components/Common/Loading";
-import Page from "@/components/Common/Page";
 import SearchByMultipleFields from "@/components/Common/SearchByMultipleFields";
 import SortDropdownMenu from "@/components/Common/SortDropdown";
 import Tabs from "@/components/Common/Tabs";
@@ -801,169 +800,159 @@ export const PatientManager = () => {
   );
 
   return (
-    <Page
-      title={t("patients")}
-      hideBack={true}
-      breadcrumbs={false}
-      className="px-4 md:px-6"
-      options={
-        <div className="flex w-full flex-col items-center justify-between lg:flex-row">
-          <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
-            <ButtonV2
-              id="add-patient-details"
-              onClick={() => {
-                const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
-                if (
-                  qParams.facility &&
-                  showAllFacilityUsers.includes(authUser.user_type)
-                )
-                  navigate(`/facility/${qParams.facility}/patient`);
-                else if (
-                  qParams.facility &&
-                  !showAllFacilityUsers.includes(authUser.user_type) &&
-                  authUser.home_facility_object?.id !== qParams.facility
-                )
-                  Notification.Error({
-                    msg: "Oops! Non-Home facility users don't have permission to perform this action.",
-                  });
-                else if (
-                  !showAllFacilityUsers.includes(authUser.user_type) &&
-                  authUser.home_facility_object?.id
-                ) {
-                  navigate(
-                    `/facility/${authUser.home_facility_object.id}/patient`,
-                  );
-                } else if (onlyAccessibleFacility)
-                  navigate(`/facility/${onlyAccessibleFacility.id}/patient`);
-                else if (
-                  !showAllFacilityUsers.includes(authUser.user_type) &&
-                  !authUser.home_facility_object?.id
-                )
-                  Notification.Error({
-                    msg: "Oops! No home facility found",
-                  });
-                else setShowDialog("create");
-              }}
-              className="w-full lg:w-fit"
-            >
-              <CareIcon icon="l-plus" className="text-lg" />
-              <p id="add-patient-div" className="lg:my-[2px]">
-                Add Patient
-              </p>
-            </ButtonV2>
-          </div>
-          <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
-            <Tabs
-              tabs={[
-                { text: t("live"), value: 0 },
-                { text: t("discharged"), value: 1 },
-              ]}
-              onTabChange={(tab) => {
-                if (tab === 0) {
-                  updateQuery({ is_active: "True" });
-                } else {
-                  const id = qParams.facility || onlyAccessibleFacility?.id;
-                  if (id) {
-                    navigate(`facility/${id}/discharged-patients`);
-                    return;
-                  }
-
-                  if (
-                    authUser.user_type === "StateAdmin" ||
-                    authUser.user_type === "StateReadOnlyAdmin"
-                  ) {
-                    updateQuery({ is_active: "False" });
-                    return;
-                  }
-
-                  Notification.Warn({
-                    msg: t("select_facility_for_discharged_patients_warning"),
-                  });
-                  setShowDialog("list-discharged");
+    <>
+      <div className="flex w-full flex-col items-center justify-between lg:flex-row">
+        <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
+          <ButtonV2
+            id="add-patient-details"
+            onClick={() => {
+              const showAllFacilityUsers = ["DistrictAdmin", "StateAdmin"];
+              if (
+                qParams.facility &&
+                showAllFacilityUsers.includes(authUser.user_type)
+              )
+                navigate(`/facility/${qParams.facility}/patient`);
+              else if (
+                qParams.facility &&
+                !showAllFacilityUsers.includes(authUser.user_type) &&
+                authUser.home_facility_object?.id !== qParams.facility
+              )
+                Notification.Error({
+                  msg: "Oops! Non-Home facility users don't have permission to perform this action.",
+                });
+              else if (
+                !showAllFacilityUsers.includes(authUser.user_type) &&
+                authUser.home_facility_object?.id
+              ) {
+                navigate(
+                  `/facility/${authUser.home_facility_object.id}/patient`,
+                );
+              } else if (onlyAccessibleFacility)
+                navigate(`/facility/${onlyAccessibleFacility.id}/patient`);
+              else if (
+                !showAllFacilityUsers.includes(authUser.user_type) &&
+                !authUser.home_facility_object?.id
+              )
+                Notification.Error({
+                  msg: "Oops! No home facility found",
+                });
+              else setShowDialog("create");
+            }}
+            className="w-full lg:w-fit"
+          >
+            <CareIcon icon="l-plus" className="text-lg" />
+            <p id="add-patient-div" className="lg:my-[2px]">
+              Add Patient
+            </p>
+          </ButtonV2>
+        </div>
+        <div className="flex w-full flex-col items-center justify-end gap-2 lg:ml-3 lg:w-fit lg:flex-row lg:gap-3">
+          <Tabs
+            tabs={[
+              { text: t("live"), value: 0 },
+              { text: t("discharged"), value: 1 },
+            ]}
+            onTabChange={(tab) => {
+              if (tab === 0) {
+                updateQuery({ is_active: "True" });
+              } else {
+                const id = qParams.facility || onlyAccessibleFacility?.id;
+                if (id) {
+                  navigate(`facility/${id}/discharged-patients`);
+                  return;
                 }
+
+                if (
+                  authUser.user_type === "StateAdmin" ||
+                  authUser.user_type === "StateReadOnlyAdmin"
+                ) {
+                  updateQuery({ is_active: "False" });
+                  return;
+                }
+
+                Notification.Warn({
+                  msg: t("select_facility_for_discharged_patients_warning"),
+                });
+                setShowDialog("list-discharged");
+              }
+            }}
+            currentTab={tabValue}
+          />
+          {!!params.facility && (
+            <ButtonV2
+              className="w-full lg:w-fit"
+              id="doctor-connect-patient-button"
+              onClick={() => {
+                triggerGoal("Doctor Connect Clicked", {
+                  facilityId: qParams.facility,
+                  userId: authUser.id,
+                  page: "FacilityPatientsList",
+                });
+                setShowDoctors(true);
               }}
-              currentTab={tabValue}
-            />
-            {!!params.facility && (
+            >
+              <CareIcon icon="l-phone" className="text-lg" />
+              <p className="lg:my-[2px]">Doctor Connect</p>
+            </ButtonV2>
+          )}
+
+          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
+          <SortDropdownMenu
+            options={PATIENT_SORT_OPTIONS}
+            selected={qParams.ordering}
+            onSelect={updateQuery}
+          />
+          <div className="tooltip w-full md:w-auto" id="patient-export">
+            {!isExportAllowed ? (
               <ButtonV2
-                className="w-full lg:w-fit"
-                id="doctor-connect-patient-button"
                 onClick={() => {
-                  triggerGoal("Doctor Connect Clicked", {
-                    facilityId: qParams.facility,
-                    userId: authUser.id,
-                    page: "FacilityPatientsList",
-                  });
-                  setShowDoctors(true);
+                  advancedFilter.setShow(true);
+                  setTimeout(() => {
+                    const element = document.getElementById("bed-type-select");
+                    if (element) element.scrollIntoView({ behavior: "smooth" });
+                    Notification.Warn({
+                      msg: "Please select a seven day period.",
+                    });
+                  }, 500);
                 }}
+                className="mr-5 w-full lg:w-fit"
               >
-                <CareIcon icon="l-phone" className="text-lg" />
-                <p className="lg:my-[2px]">Doctor Connect</p>
+                <CareIcon icon="l-export" />
+                <span className="lg:my-[3px]">Export</span>
               </ButtonV2>
+            ) : (
+              <ExportMenu
+                disabled={!isExportAllowed}
+                exportItems={[
+                  {
+                    label: "Export Live patients",
+                    action: async () => {
+                      const query = {
+                        ...params,
+                        csv: true,
+                        facility: qParams.facility,
+                      };
+                      delete qParams.is_active;
+                      const { data } = await request(routes.patientList, {
+                        query,
+                      });
+                      return data ?? null;
+                    },
+                    parse: preventDuplicatePatientsDuetoPolicyId,
+                  },
+                ]}
+              />
             )}
 
-            <AdvancedFilterButton
-              onClick={() => advancedFilter.setShow(true)}
-            />
-            <SortDropdownMenu
-              options={PATIENT_SORT_OPTIONS}
-              selected={qParams.ordering}
-              onSelect={updateQuery}
-            />
-            <div className="tooltip w-full md:w-auto" id="patient-export">
-              {!isExportAllowed ? (
-                <ButtonV2
-                  onClick={() => {
-                    advancedFilter.setShow(true);
-                    setTimeout(() => {
-                      const element =
-                        document.getElementById("bed-type-select");
-                      if (element)
-                        element.scrollIntoView({ behavior: "smooth" });
-                      Notification.Warn({
-                        msg: "Please select a seven day period.",
-                      });
-                    }, 500);
-                  }}
-                  className="mr-5 w-full lg:w-fit"
-                >
-                  <CareIcon icon="l-export" />
-                  <span className="lg:my-[3px]">Export</span>
-                </ButtonV2>
-              ) : (
-                <ExportMenu
-                  disabled={!isExportAllowed}
-                  exportItems={[
-                    {
-                      label: "Export Live patients",
-                      action: async () => {
-                        const query = {
-                          ...params,
-                          csv: true,
-                          facility: qParams.facility,
-                        };
-                        delete qParams.is_active;
-                        const { data } = await request(routes.patientList, {
-                          query,
-                        });
-                        return data ?? null;
-                      },
-                      parse: preventDuplicatePatientsDuetoPolicyId,
-                    },
-                  ]}
-                />
-              )}
-
-              {!isExportAllowed && (
-                <span className="tooltip-text tooltip-bottom -translate-x-1/2">
-                  Select a seven day period
-                </span>
-              )}
-            </div>
+            {!isExportAllowed && (
+              <span className="tooltip-text tooltip-bottom -translate-x-1/2">
+                Select a seven day period
+              </span>
+            )}
           </div>
         </div>
-      }
-    >
+      </div>
+
       <FacilitiesSelectDialogue
         show={!!showDialog}
         setSelected={(e) => setSelectedFacility(e)}
@@ -1138,6 +1127,6 @@ export const PatientManager = () => {
           setShow={setShowDoctors}
         />
       </div>
-    </Page>
+    </>
   );
 };
