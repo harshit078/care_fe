@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { properCase } from "@/Utils/utils";
 import type { QuestionnaireResponse } from "@/types/questionnaire/form";
 import type { AnswerOption, Question } from "@/types/questionnaire/question";
 
@@ -56,7 +57,7 @@ export const ChoiceQuestion = memo(function ChoiceQuestion({
             key={option.value.toString()}
             value={option.value.toString()}
           >
-            {option.value}
+            {properCase(option.value)}
           </SelectItem>
         ))}
       </SelectContent>

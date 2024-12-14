@@ -16,6 +16,65 @@ import routes from "@/Utils/request/api";
 import useTanStackQueryInstead from "@/Utils/request/useQuery";
 import { formatDateTime, formatName } from "@/Utils/utils";
 
+function PatientCard({ patient }: { patient: any }) {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <CareIcon icon="l-user" className="text-lg text-blue-700" />
+          <CardTitle className="text-lg">Linked Patient Details</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-1">
+            <p className="text-sm font-medium">Name</p>
+            <p className="text-sm text-muted-foreground">{patient.name}</p>
+          </div>
+
+          <div className="space-y-1">
+            <p className="text-sm font-medium">Phone</p>
+            {patient.phone_number ? (
+              <div className="flex items-center gap-2">
+                <a
+                  href={`tel:${patient.phone_number}`}
+                  className="text-sm text-primary hover:underline"
+                >
+                  {patient.phone_number}
+                </a>
+                <a
+                  href={`https://wa.me/${patient.phone_number?.replace(/\D+/g, "")}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-sky-600 hover:text-sky-700"
+                >
+                  <CareIcon icon="l-whatsapp" className="text-lg" />
+                </a>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">--</p>
+            )}
+          </div>
+          <div className="space-y-1 md:col-span-2">
+            <p className="text-sm font-medium">Address</p>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+              {[
+                patient.address,
+                patient.ward_object?.name,
+                patient.local_body_object?.name,
+                patient.district_object?.name,
+                patient.state_object?.name,
+              ]
+                .filter(Boolean)
+                .join(", ") || "--"}
+            </p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function FacilityCard({
   title,
   facilityData,
@@ -28,7 +87,7 @@ function FacilityCard({
       <CardHeader>
         <CardTitle className="text-lg font-semibold">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <p className="text-sm font-medium">Name</p>
@@ -216,7 +275,7 @@ export default function ResourceDetails(props: { id: string }) {
           </div>
         </div>
 
-        {/* Main Content */}
+        {/* Main Details */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -247,12 +306,22 @@ export default function ResourceDetails(props: { id: string }) {
               <div className="space-y-1">
                 <p className="text-sm font-medium">Contact Number</p>
                 {data.refering_facility_contact_number ? (
-                  <a
-                    href={`tel:${data.refering_facility_contact_number}`}
-                    className="text-sm text-primary hover:underline"
-                  >
-                    {data.refering_facility_contact_number}
-                  </a>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={`tel:${data.refering_facility_contact_number}`}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      {data.refering_facility_contact_number}
+                    </a>
+                    <a
+                      href={`https://wa.me/${data.refering_facility_contact_number?.replace(/\D+/g, "")}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sky-600 hover:text-sky-700"
+                    >
+                      <CareIcon icon="l-whatsapp" className="text-lg" />
+                    </a>
+                  </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">--</p>
                 )}
@@ -270,7 +339,12 @@ export default function ResourceDetails(props: { id: string }) {
           </CardContent>
         </Card>
 
-        {/* Facilities Section */}
+        {/* Patient Details */}
+        {data.related_patient_object && (
+          <PatientCard patient={data.related_patient_object} />
+        )}
+
+        {/* Facilities */}
         <div className="grid gap-6 md:grid-cols-2">
           <FacilityCard
             title="Origin Facility"
@@ -284,24 +358,24 @@ export default function ResourceDetails(props: { id: string }) {
           )}
         </div>
 
-        {/* Audit Log */}
+        {/* Audit Info */}
         <Card>
           <CardHeader>
-            <CardTitle>Audit Log</CardTitle>
+            <CardTitle className="text-lg">Audit Information</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Created By</p>
-                {data.created_by_object && (
+              {data.created_by_object && (
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Created By</p>
                   <p className="text-sm text-muted-foreground">
                     {formatName(data.created_by_object)}
                   </p>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  {formatDateTime(data.created_date)}
-                </p>
-              </div>
+                  <p className="text-xs text-muted-foreground">
+                    {formatDateTime(data.created_date)}
+                  </p>
+                </div>
+              )}
               <div className="space-y-1">
                 <p className="text-sm font-medium">Last Modified By</p>
                 <p className="text-sm text-muted-foreground">
@@ -318,7 +392,7 @@ export default function ResourceDetails(props: { id: string }) {
         {/* Comments Section */}
         <Card>
           <CardHeader>
-            <CardTitle>Comments</CardTitle>
+            <CardTitle className="text-lg">Comments</CardTitle>
           </CardHeader>
           <CardContent>
             <CommentSection id={props.id} />

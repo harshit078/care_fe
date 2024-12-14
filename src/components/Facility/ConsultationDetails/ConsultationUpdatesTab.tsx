@@ -5,7 +5,6 @@ import {
   Transition,
 } from "@headlessui/react";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import Chip from "@/CAREUI/display/Chip";
 import CareIcon from "@/CAREUI/icons/CareIcon";
@@ -52,7 +51,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
   const [showObservations, setShowObservations] = useState(true);
   const [observationsQuery, setObservationsQuery] = useState<QueryParams>();
-  const { t } = useTranslation();
 
   const vitals = useVitalsAspectRatioConfig({
     default: undefined,
@@ -676,11 +674,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
               className="mr-2 mt-3 w-full lg:w-full"
               tabs={[
                 {
-                  text: (
-                    <div className="flex items-center justify-center gap-1 text-sm">
-                      {t("observations")}
-                    </div>
-                  ),
+                  text: "Observations",
                   value: 1,
                 },
                 { text: "Questionnaire Responses", value: 0 },

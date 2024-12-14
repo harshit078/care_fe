@@ -4,6 +4,7 @@ import EncounterHistory from "./EncounterHistory";
 import { HealthProfileSummary } from "./HealthProfileSummary";
 import { ImmunisationRecords } from "./ImmunisationRecords";
 import PatientNotes from "./Notes";
+import { ResourceRequests } from "./ResourceRequests";
 import { SampleTestHistory } from "./SampleTestHistory";
 import ShiftingHistory from "./ShiftingHistory";
 
@@ -37,6 +38,10 @@ export const patientTabs = [
   {
     route: "request-sample-test",
     component: SampleTestHistory,
+  },
+  {
+    route: "resource-requests",
+    component: ResourceRequests,
   },
   {
     route: "patient-notes",

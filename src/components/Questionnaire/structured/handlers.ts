@@ -60,33 +60,53 @@ const handlers: {
       ];
     },
   },
-  condition: {
-    getRequests: (conditions, { resourceId, encounterId }) =>
-      conditions.map((condition) => {
-        const body: RequestTypeFor<"condition"> = {
-          clinical_status: condition.clinicalStatus,
-          verification_status: condition.verificationStatus,
-          code: condition.code,
-          onset_date_time: condition.onsetDateTime,
-          recorded_date: condition.recordedDate,
-          note: condition.note,
+  symptom: {
+    getRequests: (symptoms, { resourceId, encounterId }) =>
+      symptoms.map((symptom) => {
+        const body: RequestTypeFor<"symptom"> = {
+          clinical_status: symptom.clinicalStatus,
+          verification_status: symptom.verificationStatus,
+          code: symptom.code,
+          severity: symptom.severity,
+          onset_date_time: symptom.onsetDateTime,
+          recorded_date: symptom.recordedDate,
+          note: symptom.note,
           encounter: encounterId,
         };
 
         return {
-          url: `/api/v1/patient/${resourceId}/condition/`,
+          url: `/api/v1/patient/${resourceId}/symptom/`,
           method: "POST",
           body,
-          reference_id: "condition",
+          reference_id: "symptom",
+        };
+      }),
+  },
+  diagnosis: {
+    getRequests: (diagnoses, { resourceId, encounterId }) =>
+      diagnoses.map((diagnosis) => {
+        const body: RequestTypeFor<"diagnosis"> = {
+          clinical_status: diagnosis.clinicalStatus,
+          verification_status: diagnosis.verificationStatus,
+          code: diagnosis.code,
+          onset_date_time: diagnosis.onsetDateTime,
+          recorded_date: diagnosis.recordedDate,
+          note: diagnosis.note,
+          encounter: encounterId,
+        };
+
+        return {
+          url: `/api/v1/patient/${resourceId}/diagnosis/`,
+          method: "POST",
+          body,
+          reference_id: "diagnosis",
         };
       }),
   },
 };
 
-export function getStructuredRequests<T extends StructuredQuestionType>(
+export const getStructuredRequests = <T extends StructuredQuestionType>(
   type: T,
   data: DataTypeFor<T>[],
   context: StructuredHandlerContext,
-) {
-  return handlers[type].getRequests(data, context);
-}
+) => handlers[type].getRequests(data, context);

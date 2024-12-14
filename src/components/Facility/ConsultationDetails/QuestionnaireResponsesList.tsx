@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card";
 import { useSlugs } from "@/hooks/useSlug";
 
 import routes from "@/Utils/request/api";
-import { formatDateTime } from "@/Utils/utils";
+import { formatDateTime, properCase } from "@/Utils/utils";
 import { QuestionnaireResponse } from "@/types/questionnaire/questionnaireResponse";
 
 export default function QuestionnaireResponsesList() {
@@ -70,7 +70,8 @@ export default function QuestionnaireResponsesList() {
                     />
                     <div>
                       <h3 className="text-lg font-medium">
-                        {item.questionnaire.title}
+                        {item.questionnaire?.title ||
+                          structuredResponsesPreview(item.structured_responses)}
                       </h3>
                       <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
                         <CareIcon icon="l-calender" className="h-4 w-4" />
@@ -108,4 +109,10 @@ export default function QuestionnaireResponsesList() {
       )}
     </PaginatedList>
   );
+}
+
+export function structuredResponsesPreview(
+  structured_responses?: QuestionnaireResponse["structured_responses"],
+) {
+  return Object.keys(structured_responses || {}).map((key) => properCase(key));
 }

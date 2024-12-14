@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 
 import CareIcon from "@/CAREUI/icons/CareIcon";
 
@@ -7,12 +7,22 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import { FacilityModel } from "@/components/Facility/models";
+import { ScheduleAPIs } from "@/components/Schedule/api";
+import { UserBareMinimum } from "@/components/Users/models";
+
+import useFilters from "@/hooks/useFilters";
 
 import routes from "@/Utils/request/api";
 import request from "@/Utils/request/request";
-import { RequestResult } from "@/Utils/request/types";
+import { PaginatedResponse, RequestResult } from "@/Utils/request/types";
 
-import { FACILITY_FEATURES, FeatureBadge } from "./Utils";
+import {
+  DoctorModel,
+  FACILITY_FEATURES,
+  FeatureBadge,
+  mockDoctors,
+} from "./Utils";
+import { DoctorCard } from "./components/DoctorCard";
 
 interface Props {
   id: string;
@@ -28,6 +38,40 @@ export function FacilityDetailsPage({ id }: Props) {
         pathParams: { id },
       }),
   });
+  const { Pagination } = useFilters({
+    limit: 18,
+  });
+
+  const { data: docReponse } = useQuery<
+    RequestResult<PaginatedResponse<UserBareMinimum>>
+  >({
+    queryKey: [ScheduleAPIs.appointments.availableDoctors, id],
+    queryFn: async () => {
+      const response = await request(
+        ScheduleAPIs.appointments.availableDoctors,
+        {
+          pathParams: { facility_id: id },
+        },
+      );
+      return response;
+    },
+  });
+
+  function extendDoctors(doctors: UserBareMinimum[]): DoctorModel[] {
+    const randomDoc =
+      mockDoctors[Math.floor(Math.random() * mockDoctors.length)];
+    return doctors.map((doctor) => ({
+      ...doctor,
+      role: randomDoc.role,
+      education: randomDoc.education,
+      experience: randomDoc.experience,
+      languages: randomDoc.languages,
+      specializations: randomDoc.specializations,
+    }));
+  }
+
+  const doctors = extendDoctors(docReponse?.data?.results ?? []);
+  doctors.push(...mockDoctors);
 
   const facility = facilityResponse?.data;
 
@@ -57,9 +101,11 @@ export function FacilityDetailsPage({ id }: Props) {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex px-2 pb-4 justify-start">
-        <Button variant="ghost" onClick={() => navigate("/facilities")}>
-          <CareIcon icon="l-square-shape" className="h-4 w-4 mr-1" />
-          <span className="text-sm underline">Back</span>
+        <Button variant="ghost" asChild>
+          <Link href="/facilities">
+            <CareIcon icon="l-square-shape" className="h-4 w-4 mr-1" />
+            <span className="text-sm underline">Back</span>
+          </Link>
         </Button>
       </div>
       <Card className="overflow-hidden bg-white">
@@ -96,11 +142,28 @@ export function FacilityDetailsPage({ id }: Props) {
                 />
               ))}
             </div>
-
-            {/* Add Staff Information */}
           </div>
         </div>
       </Card>
+      <div className="mt-6">
+        {doctors.length > 0 && (
+          <>
+            <div className="grid grid-cols-1 gap-4 @xl:grid-cols-3 @4xl:grid-cols-4 @6xl:grid-cols-5 lg:grid-cols-2">
+              {doctors?.map((doctor) => (
+                <DoctorCard key={doctor.id} doctor={doctor} facilityId={id} />
+              ))}
+            </div>
+            <Pagination totalCount={doctors.length ?? 0} />
+          </>
+        )}
+        {doctors.length === 0 && (
+          <div className="h-full space-y-2 rounded-lg bg-white p-7 shadow">
+            <div className="flex w-full items-center justify-center text-xl font-bold text-secondary-500">
+              No Doctors Found
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

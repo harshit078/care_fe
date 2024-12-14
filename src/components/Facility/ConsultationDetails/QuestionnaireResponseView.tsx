@@ -49,13 +49,13 @@ export default function QuestionnaireResponseView({
   }
 
   return (
-    <Page title={formResponse.questionnaire.title}>
+    <Page title={formResponse.questionnaire?.title || ""}>
       <div className="space-y-6 p-4">
         <Card className="p-6">
           <div className="space-y-4">
             <div>
               <p className="text-sm text-muted-foreground">
-                {formResponse.questionnaire.description}
+                {formResponse.questionnaire?.description}
               </p>
             </div>
 
@@ -81,7 +81,7 @@ export default function QuestionnaireResponseView({
 
         <Card className="p-6">
           <div className="space-y-6">
-            {formResponse.questionnaire.questions.map((group: Question) => (
+            {formResponse.questionnaire?.questions.map((group: Question) => (
               <div key={group.id} className="space-y-4">
                 <h3 className="font-medium">{group.text}</h3>
                 <div className="grid gap-4">

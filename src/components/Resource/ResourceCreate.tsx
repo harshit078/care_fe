@@ -1,8 +1,9 @@
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import Card from "@/CAREUI/display/Card";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 import { Cancel, Submit } from "@/components/Common/ButtonV2";
 import { FacilitySelect } from "@/components/Common/FacilitySelect";
@@ -41,6 +42,7 @@ const initForm: any = {
   reason: "",
   refering_facility_contact_name: "",
   refering_facility_contact_number: "+91",
+  related_patient: null,
 };
 
 const requiredFields: any = {
@@ -85,6 +87,7 @@ export default function ResourceCreate(props: resourceProps) {
   const { facilityId } = props;
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
+  const [{ related_patient }] = useQueryParams();
 
   const resourceFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -114,6 +117,11 @@ export default function ResourceCreate(props: resourceProps) {
       pathParams: { id: String(facilityId) },
     },
   );
+
+  const { data: patientData } = useTanStackQueryInstead(routes.getPatient, {
+    pathParams: { id: related_patient || "" },
+    prefetch: !!related_patient,
+  });
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -187,6 +195,7 @@ export default function ResourceCreate(props: resourceProps) {
         refering_facility_contact_number: parsePhoneNumber(
           state.form.refering_facility_contact_number,
         ),
+        related_patient: related_patient,
       };
 
       const { res, data } = await request(routes.createResource, {
@@ -219,6 +228,18 @@ export default function ResourceCreate(props: resourceProps) {
       backUrl={`/facility/${facilityId}`}
     >
       <Card className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+        {patientData && (
+          <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 md:col-span-2">
+            <div className="flex items-center gap-2">
+              <CareIcon icon="l-user" className="text-lg text-blue-700" />
+              <span className="text-sm text-blue-700">
+                Linked Patient:{" "}
+                <span className="font-medium">{patientData.name}</span>
+              </span>
+            </div>
+          </div>
+        )}
+
         <TextFormField
           required
           label={t("contact_person")}

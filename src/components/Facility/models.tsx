@@ -757,6 +757,7 @@ export interface ResourceModel {
   created_by_object: UserBareMinimum | null;
   created_date: string;
   last_edited_by_object: UserBareMinimum;
+  related_patient_object: PatientModel | null;
 }
 
 export interface CommentModel {

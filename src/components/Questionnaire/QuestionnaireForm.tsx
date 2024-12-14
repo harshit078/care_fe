@@ -127,11 +127,9 @@ export function QuestionnaireForm({
   const handleSubmissionError = (results: ValidationErrorResponse[]) => {
     const updatedForms = [...questionnaireForms];
     const errorMessages: string[] = [];
-
     results.forEach((result, index) => {
       const form = updatedForms[index];
-
-      result.data.errors.forEach(
+      result.data.errors?.forEach?.(
         (error: QuestionValidationError | DetailedValidationError) => {
           // Handle question-specific errors
           if ("question_id" in error) {
@@ -231,8 +229,8 @@ export function QuestionnaireForm({
         handleSubmissionError(
           response.error.results as ValidationErrorResponse[],
         );
-        Error({ msg: "Failed to submit questionnaire" });
       }
+      Error({ msg: "Failed to submit questionnaire" });
       return;
     }
 
@@ -242,8 +240,8 @@ export function QuestionnaireForm({
 
   return (
     <div className="flex gap-4">
-      {/* Left Navigation */}
-      <div className="w-64 border-r p-4 space-y-4 overflow-y-auto sticky top-6 h-screen">
+      {/* Left Navigation | Desktop */}
+      <div className="w-64 border-r p-4 space-y-4 overflow-y-auto sticky top-6 h-screen hidden md:block">
         {questionnaireForms.map((form) => (
           <div key={form.questionnaire.id} className="space-y-2">
             <button
@@ -283,8 +281,8 @@ export function QuestionnaireForm({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto max-w-3xl pb-8">
-        <div className="p-4 space-y-6">
+      <div className="flex-1 overflow-y-auto pb-8">
+        <div className="md:p-4 space-y-6">
           {/* Search and Add Questionnaire */}
 
           <div className="flex gap-4 items-center">
@@ -315,7 +313,7 @@ export function QuestionnaireForm({
           {questionnaireForms.map((form, index) => (
             <div
               key={`${form.questionnaire.id}-${index}`}
-              className="border rounded-lg p-6 space-y-6"
+              className="border rounded-lg p-4 md:p-6 space-y-6"
             >
               <div className="flex justify-between items-center">
                 <div className="space-y-1">
@@ -412,13 +410,15 @@ export function QuestionnaireForm({
             </div>
           )}
         </div>
-        {/* Add a Preview of the QuestionnaireForm */}
-        <div className="p-4 space-y-6">
-          <h2 className="text-xl font-semibold">QuestionnaireForm</h2>
-          <pre className="text-sm text-muted-foreground">
-            {JSON.stringify(questionnaireForms, null, 2)}
-          </pre>
-        </div>
+        {/* Add a Dev Preview of the QuestionnaireForm */}
+        {import.meta.env.DEV && (
+          <div className="p-4 space-y-6">
+            <h2 className="text-xl font-semibold">QuestionnaireForm</h2>
+            <pre className="text-sm text-muted-foreground">
+              {JSON.stringify(questionnaireForms, null, 2)}
+            </pre>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -14,9 +14,10 @@ import type { EnableWhen, Question } from "@/types/questionnaire/question";
 
 import { AllergyQuestion } from "./AllergyQuestion";
 import { ChoiceQuestion } from "./ChoiceQuestion";
-import { ConditionQuestion } from "./ConditionQuestion";
+import { DiagnosisQuestion } from "./DiagnosisQuestion";
 import { MedicationQuestion } from "./MedicationQuestion";
 import { NotesInput } from "./NotesInput";
+import { SymptomQuestion } from "./SymptomQuestion";
 
 interface QuestionInputProps {
   question: Question;
@@ -231,9 +232,17 @@ export function QuestionInput({
                 disabled={!isEnabled}
               />
             );
-          case "condition":
+          case "symptom":
             return (
-              <ConditionQuestion
+              <SymptomQuestion
+                questionnaireResponse={questionnaireResponse}
+                updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
+                disabled={!isEnabled}
+              />
+            );
+          case "diagnosis":
+            return (
+              <DiagnosisQuestion
                 questionnaireResponse={questionnaireResponse}
                 updateQuestionnaireResponseCB={updateQuestionnaireResponseCB}
                 disabled={!isEnabled}

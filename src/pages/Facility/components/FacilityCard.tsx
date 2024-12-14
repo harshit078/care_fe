@@ -17,10 +17,10 @@ interface Props {
 export function FacilityCard({ facility, className }: Props) {
   return (
     <Card className={cn("overflow-hidden bg-white", className)}>
-      <div className="h-[225px] flex flex-col">
+      <div className="flex flex-col">
         <div className="p-6">
           <div className="flex flex-col sm:flex-row gap-4">
-            <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg">
+            <div className="h-32 w-32 shrink-0 overflow-hidden rounded-lg">
               <img
                 src={
                   facility.read_cover_image_url ||
