@@ -1589,5 +1589,11 @@
   "yet_to_be_decided": "Yet to be decided",
   "you_need_at_least_a_location_to_create_an_assest": "You need at least a location to create an assest.",
   "zoom_in": "Zoom In",
-  "zoom_out": "Zoom Out"
+  "zoom_out": "Zoom Out",
+  "day": "Day",
+  "month": "Month",
+  "year": "Year",
+  "use_address_as_permanent": "Use this address for permanent address",
+  "landmark": "Landmark",
+  "social_profile_detail": "Include occupation, ration card category, socioeconomic status, and  domestic healthcare support for a complete profile."
 }
